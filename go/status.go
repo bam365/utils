@@ -134,7 +134,7 @@ func xfer_rate_str(rate int) string {
                 out = strconv.Itoa(rate / 1000000)
                 suf = "M"
         } else if rate >= 1000000 {
-                out = strconv.Ftoa32(float32(rate) / 1000000.0, 'b', -1)
+                out = strconv.Ftoa32(float32(rate) / 1000000.0, 'f', 2)
                 suf = "M"
         } else if rate >= 1000 {
                 out = strconv.Itoa(rate / 1000)
@@ -144,7 +144,7 @@ func xfer_rate_str(rate int) string {
                 suf = "B"
         }
         if len(out) > 3 {
-                out = out[:2]
+                out = out[:3]
         } else if len(out) < 3 {
                 out = str_pad(out, " ", 3)
         }
