@@ -6,36 +6,28 @@ package main
 
 import (
         "fmt"
-        "flag"
         "io/ioutil"
         "net/http"
+        "os"
+        "strconv"
 )
 
 
 func main() {
-        var portflag int
-        var fcontents string
+        port := 8080
 
-        flag.IntVar(&portflag, "p", 8080, "Port to run webserver on")
-        flag.Parse()
-        if len(flag.Args()) < 1 {
-                fmt.Println("Need to specify a page")
-                return;
+        if len(os.Args) > 1 {
+                if pparse, cerr := strconv.Atoi(os.Args[1]); cerr != nil {
+                        fmt.Println("Bad port arg")
+                        return;
+                } else {
+                        port = pparse
+                }
         }
-        fname := flag.Arg(0);
 
-        fbuf, ferr := ioutil.ReadFile(fname)
-        if ferr != nil {
-                fmt.Printf("Could not open file. Reason: %s", ferr.Error())
-                return
-        }
-        fcontents = string(fbuf)
-
-        fmt.Printf("Serving %s on port %d\n", fname, portflag)
-        http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
-                fmt.Fprintln(w, fcontents)
-        });
-        herr := http.ListenAndServe(fmt.Sprintf(":%d", portflag), nil)
+        fmt.Printf("Serving on port %d\n", port)
+        http.HandleFunc("/", Handler);
+        herr := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
         if herr != nil {
                 fmt.Printf("Couldn't start web server. Reason: %s\n", 
                             herr.Error())
@@ -44,11 +36,23 @@ func main() {
 }
 
 
+func Handler(w http.ResponseWriter, r *http.Request) {
+        fname := r.URL.RequestURI()
 
+        if fname[0] == '/' {
+                fname = fname[1:]
+        }
+        fbuf, ferr := ioutil.ReadFile(fname)
+        if ferr != nil {
+                fmt.Printf("Could not open file '%s'. Reason: %s", fname, ferr.Error())
+                http.Error(w, "Not found", http.StatusNotFound)
+                return
+        } else {
+                fmt.Printf("File '%s' requested\n", fname)
+        }
 
+        fmt.Fprintln(w, string(fbuf))
+}
 
-
-               
-
-
-
+        
+        
