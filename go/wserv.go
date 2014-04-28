@@ -26,8 +26,8 @@ func main() {
         }
 
         fmt.Printf("Serving on port %d\n", port)
-        http.HandleFunc("/", Handler);
-        herr := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+        herr := http.ListenAndServe(fmt.Sprintf(":%d", port),
+                                    http.FileServer(http.Dir(".")))
         if herr != nil {
                 fmt.Printf("Couldn't start web server. Reason: %s\n", 
                             herr.Error())
